@@ -85,7 +85,7 @@ lib/
 ### Βήματα
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/expense_app.git
+git clone https://github.com/TechChefe/expense_app__.git
 cd expense_app
 flutter pub get
 flutter run
