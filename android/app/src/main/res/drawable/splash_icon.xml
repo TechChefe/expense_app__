@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Wallet shape -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="M24,36 L84,36 Q88,36 88,40 L88,72 Q88,76 84,76 L24,76 Q20,76 20,72 L20,40 Q20,36 24,36 Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,46 L88,46 L88,52 L20,52 Z"/>
+    <path
+        android:fillColor="#00BFA5"
+        android:pathData="M72,58 Q72,54 76,54 Q80,54 80,58 Q80,62 76,62 Q72,62 72,58 Z"/>
+    <!-- Card lines at top -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="M30,28 L78,28 Q82,28 84,32 L84,36 L24,36 L24,32 Q26,28 30,28 Z"/>
+</vector>
