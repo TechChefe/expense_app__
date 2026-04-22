@@ -52,18 +52,16 @@ class DatabaseService {
       )
     ''');
 
-    // Seed with sample data on first creation
+
     await _seedData(db);
   }
 
-  // ── Seed Data ─────────────────────────────────────────────────────────────
-  // Inserts sample categories and expenses so the app has demo content
-  // on first launch. This runs only once when the DB is first created.
+
 
   Future<void> _seedData(Database db) async {
     final now = DateTime.now();
 
-    // ── Insert categories ──────────────────────────────────────────────────
+
     await db.insert('categories', {
       'name': 'Σούπερ Μάρκετ',
       'description': 'Εβδομαδιαίες αγορές τροφίμων και είδη σπιτιού',
@@ -93,15 +91,12 @@ class DatabaseService {
       'description': 'Ρούχα, παπούτσια και αξεσουάρ',
     });
 
-    // Category IDs are 1–7 in insertion order
 
-    // ── Insert expenses ────────────────────────────────────────────────────
-    // Helper to build a date relative to today
     String daysAgo(int days, {int hour = 12, int minute = 0}) =>
         DateTime(now.year, now.month, now.day - days, hour, minute)
             .toIso8601String();
 
-    // Σούπερ Μάρκετ (category_id = 1)
+
     await db.insert('expenses', {
       'description': 'Εβδομαδιαία αγορά Sklavenitis',
       'amount': 87.50,
@@ -121,7 +116,7 @@ class DatabaseService {
       'location_name': 'Λαϊκή Αγορά',
     });
 
-    // Μεταφορές (category_id = 2)
+
     await db.insert('expenses', {
       'description': 'Βενζίνη αυτοκινήτου',
       'amount': 55.00,
@@ -141,7 +136,7 @@ class DatabaseService {
       'location_name': null,
     });
 
-    // Εστίαση (category_id = 3)
+
     await db.insert('expenses', {
       'description': 'Γεύμα με συναδέλφους',
       'amount': 42.50,
@@ -161,7 +156,7 @@ class DatabaseService {
       'location_name': 'Mikel Coffee',
     });
 
-    // Λογαριασμοί (category_id = 4)
+
     await db.insert('expenses', {
       'description': 'ΔΕΗ Απριλίου',
       'amount': 112.00,
@@ -181,7 +176,7 @@ class DatabaseService {
       'location_name': null,
     });
 
-    // Υγεία (category_id = 6)
+
     await db.insert('expenses', {
       'description': 'Φάρμακα φαρμακείου',
       'amount': 18.75,
@@ -192,7 +187,7 @@ class DatabaseService {
       'location_name': 'Φαρμακείο Παπαδόπουλος',
     });
 
-    // Ένδυση (category_id = 7)
+
     await db.insert('expenses', {
       'description': 'Αγορά παπουτσιών',
       'amount': 79.99,
@@ -204,7 +199,7 @@ class DatabaseService {
     });
   }
 
-  // ── Categories CRUD ───────────────────────────────────────────────────────
+
 
   Future<int> insertCategory(Category category) async {
     final db = await database;
@@ -229,7 +224,7 @@ class DatabaseService {
     return db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 
-  // ── Expenses CRUD ─────────────────────────────────────────────────────────
+
 
   Future<int> insertExpense(Expense expense) async {
     final db = await database;

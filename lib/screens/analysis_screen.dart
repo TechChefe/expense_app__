@@ -59,7 +59,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       appBar: AppBar(title: const Text('Ανάλυση Εξόδων')),
       body: Column(
         children: [
-          // Date range picker bar
           Container(
             color: AppTheme.primary,
             padding: const EdgeInsets.symmetric(
@@ -281,7 +280,7 @@ class _Results extends StatelessWidget {
                 color: AppTheme.textPrimary)),
         const SizedBox(height: 8),
 
-        // Ranked list – descending
+
         ...results.asMap().entries.map((entry) {
           final i = entry.key;
           final r = entry.value;

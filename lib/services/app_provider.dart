@@ -32,7 +32,6 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Categories ────────────────────────────────────────────────────────────
 
   Future<cat_model.Category> addCategory(String name,
       {String? description}) async {
@@ -72,7 +71,6 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  // ── Expenses ──────────────────────────────────────────────────────────────
 
   Future<Expense> addExpense({
     String? description,

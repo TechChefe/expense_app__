@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to HomeScreen after 2.5 seconds
+    //HomeScreen μετά απο 2.5 δευτερόλεπτα
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -65,7 +65,6 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo container
                 Container(
                   width: 110,
                   height: 110,
@@ -104,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                 // Subtitle
                 const Text(
-                  'Διαχείριση Καθημερινών Εξόδων',
+                  'Διαχείριση Εξόδων',
                   style: TextStyle(
                     fontSize: 15,
                     color: Color(0xFF6B7280),

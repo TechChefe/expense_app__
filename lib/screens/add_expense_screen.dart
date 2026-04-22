@@ -11,7 +11,6 @@ import '../services/location_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/formatters.dart';
 
-// Alias for convenience
 typedef Category = cat_model.Category;
 
 class AddExpenseScreen extends StatefulWidget {
@@ -370,7 +369,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 }
 
-// ── Section label widget ──────────────────────────────────────────────────────
 
 class _Label extends StatelessWidget {
   final String text;
@@ -391,7 +389,6 @@ class _Label extends StatelessWidget {
   }
 }
 
-// ── Quick category creation screen ───────────────────────────────────────────
 
 class _QuickCategoryScreen extends StatefulWidget {
   const _QuickCategoryScreen();
