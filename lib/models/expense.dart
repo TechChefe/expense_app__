@@ -38,8 +38,12 @@ class Expense {
         amount: (map['amount'] as num).toDouble(),
         categoryId: map['category_id'] as int,
         dateTime: DateTime.parse(map['date_time'] as String),
-        latitude: map['latitude'] != null ? (map['latitude'] as num).toDouble() : null,
-        longitude: map['longitude'] != null ? (map['longitude'] as num).toDouble() : null,
+        latitude: map['latitude'] != null
+            ? (map['latitude'] as num).toDouble()
+            : null,
+        longitude: map['longitude'] != null
+            ? (map['longitude'] as num).toDouble()
+            : null,
         locationName: map['location_name'] as String?,
       );
 

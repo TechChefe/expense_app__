@@ -44,8 +44,7 @@ class LocationService {
           final p = placemarks.first;
           final parts = <String>[
             if (p.street != null && p.street!.isNotEmpty) p.street!,
-            if (p.locality != null && p.locality!.isNotEmpty)
-              p.locality!,
+            if (p.locality != null && p.locality!.isNotEmpty) p.locality!,
             if (p.country != null && p.country!.isNotEmpty) p.country!,
           ];
           address = parts.join(', ');

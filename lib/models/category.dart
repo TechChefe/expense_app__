@@ -30,8 +30,7 @@ class Category {
       );
 
   @override
-  bool operator ==(Object other) =>
-      other is Category && other.id == id;
+  bool operator ==(Object other) => other is Category && other.id == id;
 
   @override
   int get hashCode => id.hashCode;

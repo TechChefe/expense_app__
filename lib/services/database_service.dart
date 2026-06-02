@@ -19,16 +19,12 @@ class DatabaseService {
 
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'expense_app.db');
-    return openDatabase(
-      path,
-      version: 1,
-      onCreate: _createTables,
-    );
+    // Bumped to _pro to force fresh creation with the new seed data
+    final path = join(dbPath, 'expense_app_pro2.db');
+    return openDatabase(path, version: 1, onCreate: _createTables);
   }
 
   Future<void> _createTables(Database db, int version) async {
-    // Categories table
     await db.execute('''
       CREATE TABLE categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,8 +32,6 @@ class DatabaseService {
         description TEXT
       )
     ''');
-
-    // Expenses table
     await db.execute('''
       CREATE TABLE expenses (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,155 +45,357 @@ class DatabaseService {
         FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
       )
     ''');
-
-
     await _seedData(db);
   }
 
-
-
+  // ── Seed Data — runs once on first install ───────────────────────────────
   Future<void> _seedData(Database db) async {
     final now = DateTime.now();
-
-
-    await db.insert('categories', {
-      'name': 'Σούπερ Μάρκετ',
-      'description': 'Εβδομαδιαίες αγορές τροφίμων και είδη σπιτιού',
-    });
-    await db.insert('categories', {
-      'name': 'Μεταφορές',
-      'description': 'Καύσιμα, εισιτήρια, taxi και κόστος μετακίνησης',
-    });
-    await db.insert('categories', {
-      'name': 'Εστίαση',
-      'description': 'Εστιατόρια, καφετέριες και delivery φαγητού',
-    });
-    await db.insert('categories', {
-      'name': 'Λογαριασμοί',
-      'description': 'ΔΕΗ, νερό, τηλέφωνο, internet και ενοίκιο',
-    });
-    await db.insert('categories', {
-      'name': 'Ψυχαγωγία',
-      'description': 'Κινηματογράφος, συναυλίες, streaming και χόμπι',
-    });
-    await db.insert('categories', {
-      'name': 'Υγεία',
-      'description': 'Φαρμακείο, γιατροί και εξετάσεις',
-    });
-    await db.insert('categories', {
-      'name': 'Ένδυση',
-      'description': 'Ρούχα, παπούτσια και αξεσουάρ',
-    });
-
-
-    String daysAgo(int days, {int hour = 12, int minute = 0}) =>
-        DateTime(now.year, now.month, now.day - days, hour, minute)
+    String when(int daysAgo, {int h = 12, int m = 0}) =>
+        DateTime(now.year, now.month, now.day - daysAgo, h, m)
             .toIso8601String();
 
+    // ── Categories ──────────────────────────────────────────────────────
+    final cIds = <String, int>{};
+    Future<void> addCat(String key, String name, String desc) async {
+      cIds[key] = await db.insert('categories', {
+        'name': name,
+        'description': desc,
+      });
+    }
 
-    await db.insert('expenses', {
-      'description': 'Εβδομαδιαία αγορά Sklavenitis',
-      'amount': 87.50,
-      'category_id': 1,
-      'date_time': daysAgo(1, hour: 11, minute: 30),
-      'latitude': 40.6401,
-      'longitude': 22.9444,
-      'location_name': 'Sklavenitis Καλαμαριά',
-    });
-    await db.insert('expenses', {
-      'description': 'Αγορά φρούτων και λαχανικών',
-      'amount': 23.40,
-      'category_id': 1,
-      'date_time': daysAgo(5, hour: 10, minute: 15),
-      'latitude': 40.6361,
-      'longitude': 22.9385,
-      'location_name': 'Λαϊκή Αγορά',
-    });
+    await addCat('coffee', 'Καφές & Σνακ',
+        'Αγορές καφέ, snacks και ροφημάτων');
+    await addCat('clothing', 'Ένδυση & Αθλητικά',
+        'Ρούχα, παπούτσια και αθλητικά είδη');
+    await addCat('subs', 'Συνδρομές',
+        'Streaming, εφαρμογές και ψηφιακές υπηρεσίες');
+    await addCat('travel', 'Ταξίδια',
+        'Αεροπορικά εισιτήρια και διαμονή');
+    await addCat('dining', 'Εστίαση',
+        'Εστιατόρια, μεζεδοπωλεία και delivery');
+    await addCat('home', 'Σπίτι & Διάφορα',
+        'Είδη σπιτιού, διακόσμηση και καθημερινές αγορές');
+    await addCat('market', 'Σούπερ Μάρκετ',
+        'Εβδομαδιαίες αγορές τροφίμων');
+    await addCat('transport', 'Μεταφορές',
+        'Καύσιμα, εισιτήρια και taxi');
 
+    // ── Expenses ────────────────────────────────────────────────────────
+    final all = <Map<String, dynamic>>[
+      // ── Καφές & Σνακ ──
+      {
+        'description': 'Freddo espresso',
+        'amount': 3.80,
+        'category_id': cIds['coffee'],
+        'date_time': when(0, h: 9, m: 15),
+        'latitude': 40.6308,
+        'longitude': 22.9437,
+        'location_name': 'Mikel Coffee Τσιμισκή',
+      },
+      {
+        'description': 'Cappuccino και τοστ',
+        'amount': 6.40,
+        'category_id': cIds['coffee'],
+        'date_time': when(1, h: 10, m: 30),
+        'latitude': 40.6256,
+        'longitude': 22.9485,
+        'location_name': 'Coffee Island Νέα Παραλία',
+      },
+      {
+        'description': 'Iced latte',
+        'amount': 4.90,
+        'category_id': cIds['coffee'],
+        'date_time': when(2, h: 16, m: 45),
+        'latitude': 40.5867,
+        'longitude': 22.9587,
+        'location_name': 'Starbucks One Salonica',
+      },
 
-    await db.insert('expenses', {
-      'description': 'Βενζίνη αυτοκινήτου',
-      'amount': 55.00,
-      'category_id': 2,
-      'date_time': daysAgo(2, hour: 9, minute: 0),
-      'latitude': 40.6486,
-      'longitude': 22.9553,
-      'location_name': 'BP Πανόραμα',
-    });
-    await db.insert('expenses', {
-      'description': 'Μηνιαία κάρτα ΟΑΣΘ',
-      'amount': 30.00,
-      'category_id': 2,
-      'date_time': daysAgo(7, hour: 8, minute: 45),
-      'latitude': null,
-      'longitude': null,
-      'location_name': null,
-    });
+      // ── Ένδυση & Αθλητικά ──
+      {
+        'description': 'Nike Dri-FIT t-shirt',
+        'amount': 66.30,
+        'category_id': cIds['clothing'],
+        'date_time': when(3, h: 18, m: 20),
+        'latitude': 40.5814,
+        'longitude': 22.9961,
+        'location_name': 'Nike Store Mediterranean Cosmos',
+      },
+      {
+        'description': 'Adidas Samba OG sneakers',
+        'amount': 119.99,
+        'category_id': cIds['clothing'],
+        'date_time': when(8, h: 17, m: 0),
+        'latitude': 40.6326,
+        'longitude': 22.9396,
+        'location_name': 'Adidas Original Στore Τσιμισκή',
+      },
+      {
+        'description': 'Under Armour αθλητικά σορτς',
+        'amount': 38.50,
+        'category_id': cIds['clothing'],
+        'date_time': when(11, h: 14, m: 10),
+        'latitude': 40.5870,
+        'longitude': 22.9970,
+        'location_name': 'Cosmos Sport Mediterranean Cosmos',
+      },
+      {
+        'description': 'Puma αθλητική φόρμα',
+        'amount': 75.00,
+        'category_id': cIds['clothing'],
+        'date_time': when(15, h: 19, m: 30),
+        'latitude': 40.6298,
+        'longitude': 22.9421,
+        'location_name': 'Intersport Aristotelous',
+      },
 
+      // ── Συνδρομές ──
+      {
+        'description': 'Συνδρομή Cosmote TV',
+        'amount': 24.90,
+        'category_id': cIds['subs'],
+        'date_time': when(4, h: 8, m: 0),
+        'latitude': null,
+        'longitude': null,
+        'location_name': null,
+      },
+      {
+        'description': 'Netflix Premium',
+        'amount': 17.99,
+        'category_id': cIds['subs'],
+        'date_time': when(6, h: 8, m: 0),
+        'latitude': null,
+        'longitude': null,
+        'location_name': null,
+      },
+      {
+        'description': 'Spotify Premium',
+        'amount': 9.99,
+        'category_id': cIds['subs'],
+        'date_time': when(9, h: 8, m: 0),
+        'latitude': null,
+        'longitude': null,
+        'location_name': null,
+      },
+      {
+        'description': 'YouTube Premium Family',
+        'amount': 21.99,
+        'category_id': cIds['subs'],
+        'date_time': when(13, h: 8, m: 0),
+        'latitude': null,
+        'longitude': null,
+        'location_name': null,
+      },
 
-    await db.insert('expenses', {
-      'description': 'Γεύμα με συναδέλφους',
-      'amount': 42.50,
-      'category_id': 3,
-      'date_time': daysAgo(3, hour: 14, minute: 0),
-      'latitude': 40.6333,
-      'longitude': 22.9408,
-      'location_name': 'The Food Company',
-    });
-    await db.insert('expenses', {
-      'description': 'Καφές και σνακ',
-      'amount': 8.60,
-      'category_id': 3,
-      'date_time': daysAgo(0, hour: 9, minute: 30),
-      'latitude': 40.6300,
-      'longitude': 22.9450,
-      'location_name': 'Mikel Coffee',
-    });
+      // ── Ταξίδια ──
+      {
+        'description': 'Aegean Airlines: ΑΘΗ → Μύκονος',
+        'amount': 142.50,
+        'category_id': cIds['travel'],
+        'date_time': when(5, h: 11, m: 15),
+        'latitude': 37.9356,
+        'longitude': 23.9484,
+        'location_name': 'Aegean Office Αθήνα',
+      },
+      {
+        'description': 'Ryanair: SKG → Ρώμη',
+        'amount': 89.00,
+        'category_id': cIds['travel'],
+        'date_time': when(10, h: 22, m: 5),
+        'latitude': null,
+        'longitude': null,
+        'location_name': 'ryanair.com',
+      },
+      {
+        'description': 'Δωμάτιο Airbnb 2 βραδιές',
+        'amount': 156.00,
+        'category_id': cIds['travel'],
+        'date_time': when(14, h: 20, m: 0),
+        'latitude': null,
+        'longitude': null,
+        'location_name': 'airbnb.com',
+      },
 
+      // ── Εστίαση ──
+      {
+        'description': 'Δείπνο σε μεζεδοπωλείο',
+        'amount': 48.50,
+        'category_id': cIds['dining'],
+        'date_time': when(2, h: 21, m: 30),
+        'latitude': 40.6395,
+        'longitude': 22.9358,
+        'location_name': 'Λαδάδικα — Ντερέ Παπά',
+      },
+      {
+        'description': 'Pizza & wings delivery',
+        'amount': 22.40,
+        'category_id': cIds['dining'],
+        'date_time': when(7, h: 20, m: 45),
+        'latitude': 40.6310,
+        'longitude': 22.9540,
+        'location_name': 'Domino\'s Pizza Καλαμαριά',
+      },
+      {
+        'description': 'Σουβλάκι & μπύρα',
+        'amount': 14.80,
+        'category_id': cIds['dining'],
+        'date_time': when(1, h: 14, m: 0),
+        'latitude': 40.6403,
+        'longitude': 22.9337,
+        'location_name': 'Ολύμπιον Λαδάδικα',
+      },
 
-    await db.insert('expenses', {
-      'description': 'ΔΕΗ Απριλίου',
-      'amount': 112.00,
-      'category_id': 4,
-      'date_time': daysAgo(10, hour: 10, minute: 0),
-      'latitude': null,
-      'longitude': null,
-      'location_name': null,
-    });
-    await db.insert('expenses', {
-      'description': 'Συνδρομή Netflix',
-      'amount': 13.99,
-      'category_id': 5,
-      'date_time': daysAgo(4, hour: 0, minute: 0),
-      'latitude': null,
-      'longitude': null,
-      'location_name': null,
-    });
+      // ── Σπίτι & Διάφορα ──
+      {
+        'description': 'Διακοσμητικά κεριά & αρωματικά',
+        'amount': 14.85,
+        'category_id': cIds['home'],
+        'date_time': when(6, h: 13, m: 20),
+        'latitude': 40.5867,
+        'longitude': 22.9587,
+        'location_name': 'Tedi Καλαμαριά',
+      },
+      {
+        'description': 'Είδη κουζίνας & αποθήκευσης',
+        'amount': 9.30,
+        'category_id': cIds['home'],
+        'date_time': when(12, h: 16, m: 40),
+        'latitude': 40.6580,
+        'longitude': 22.9505,
+        'location_name': 'Tedi Παύλος Μελάς',
+      },
+      {
+        'description': 'Παπλωματοθήκη & μαξιλάρια Jumbo',
+        'amount': 42.70,
+        'category_id': cIds['home'],
+        'date_time': when(16, h: 11, m: 0),
+        'latitude': 40.6789,
+        'longitude': 22.9456,
+        'location_name': 'Jumbo Σταυρούπολη',
+      },
 
+      // ── Σούπερ Μάρκετ ──
+      {
+        'description': 'Εβδομαδιαία αγορά Sklavenitis',
+        'amount': 92.30,
+        'category_id': cIds['market'],
+        'date_time': when(0, h: 18, m: 30),
+        'latitude': 40.5901,
+        'longitude': 22.9603,
+        'location_name': 'Sklavenitis Καλαμαριά',
+      },
+      {
+        'description': 'AB Βασιλόπουλος — φρούτα & λαχανικά',
+        'amount': 28.45,
+        'category_id': cIds['market'],
+        'date_time': when(4, h: 19, m: 0),
+        'latitude': 40.6347,
+        'longitude': 22.9468,
+        'location_name': 'AB Βασιλόπουλος Λευκός Πύργος',
+      },
 
-    await db.insert('expenses', {
-      'description': 'Φάρμακα φαρμακείου',
-      'amount': 18.75,
-      'category_id': 6,
-      'date_time': daysAgo(6, hour: 11, minute: 0),
-      'latitude': 40.6415,
-      'longitude': 22.9380,
-      'location_name': 'Φαρμακείο Παπαδόπουλος',
-    });
+      // ── Μεταφορές ──
+      {
+        'description': 'Βενζίνη αυτοκινήτου',
+        'amount': 55.00,
+        'category_id': cIds['transport'],
+        'date_time': when(3, h: 9, m: 0),
+        'latitude': 40.5878,
+        'longitude': 22.9844,
+        'location_name': 'BP Πανόραμα',
+      },
+      {
+        'description': 'Μηνιαία κάρτα ΟΑΣΘ',
+        'amount': 30.00,
+        'category_id': cIds['transport'],
+        'date_time': when(20, h: 8, m: 30),
+        'latitude': null,
+        'longitude': null,
+        'location_name': null,
+      },
 
+      // ── ΠΑΛΑΙΟΤΕΡΑ (35–90 ημέρες πίσω) για να ξεχωρίζει 30d vs 90d ─────
+      {
+        'description': 'Adidas αθλητικά παπούτσια',
+        'amount': 95.50,
+        'category_id': cIds['clothing'],
+        'date_time': when(35, h: 17, m: 40),
+        'latitude': 40.5814,
+        'longitude': 22.9961,
+        'location_name': 'Adidas Store Mediterranean Cosmos',
+      },
+      {
+        'description': 'Aegean: Ρόδος επιστροφή',
+        'amount': 187.30,
+        'category_id': cIds['travel'],
+        'date_time': when(42, h: 21, m: 15),
+        'latitude': null,
+        'longitude': null,
+        'location_name': 'aegeanair.com',
+      },
+      {
+        'description': 'Συνδρομή Cosmote TV (μήνας)',
+        'amount': 24.90,
+        'category_id': cIds['subs'],
+        'date_time': when(48, h: 8, m: 0),
+        'latitude': null,
+        'longitude': null,
+        'location_name': null,
+      },
+      {
+        'description': 'Δείπνο στο Pellegrino',
+        'amount': 62.40,
+        'category_id': cIds['dining'],
+        'date_time': when(55, h: 21, m: 0),
+        'latitude': 40.6298,
+        'longitude': 22.9421,
+        'location_name': 'Pellegrino Λευκός Πύργος',
+      },
+      {
+        'description': 'Tedi είδη μπάνιου',
+        'amount': 18.20,
+        'category_id': cIds['home'],
+        'date_time': when(62, h: 12, m: 30),
+        'latitude': 40.6580,
+        'longitude': 22.9505,
+        'location_name': 'Tedi Παύλος Μελάς',
+      },
+      {
+        'description': 'Καφές με φίλους',
+        'amount': 9.80,
+        'category_id': cIds['coffee'],
+        'date_time': when(70, h: 18, m: 30),
+        'latitude': 40.6256,
+        'longitude': 22.9485,
+        'location_name': 'Coffee Island Νέα Παραλία',
+      },
+      {
+        'description': 'AB Βασιλόπουλος εβδομαδιαία',
+        'amount': 64.85,
+        'category_id': cIds['market'],
+        'date_time': when(78, h: 19, m: 30),
+        'latitude': 40.6347,
+        'longitude': 22.9468,
+        'location_name': 'AB Βασιλόπουλος Λευκός Πύργος',
+      },
+      {
+        'description': 'Nike sneakers',
+        'amount': 109.99,
+        'category_id': cIds['clothing'],
+        'date_time': when(85, h: 16, m: 20),
+        'latitude': 40.5814,
+        'longitude': 22.9961,
+        'location_name': 'Nike Store Mediterranean Cosmos',
+      },
+    ];
 
-    await db.insert('expenses', {
-      'description': 'Αγορά παπουτσιών',
-      'amount': 79.99,
-      'category_id': 7,
-      'date_time': daysAgo(12, hour: 16, minute: 30),
-      'latitude': 40.6350,
-      'longitude': 22.9400,
-      'location_name': 'Tsakiris Mallas Τσιμισκή',
-    });
+    for (final row in all) {
+      await db.insert('expenses', row);
+    }
   }
 
-
+  // ── Categories CRUD ───────────────────────────────────────────────────────
 
   Future<int> insertCategory(Category category) async {
     final db = await database;
@@ -224,7 +420,7 @@ class DatabaseService {
     return db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 
-
+  // ── Expenses CRUD ─────────────────────────────────────────────────────────
 
   Future<int> insertExpense(Expense expense) async {
     final db = await database;

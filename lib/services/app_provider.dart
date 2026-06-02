@@ -3,9 +3,9 @@
 import 'package:flutter/foundation.dart';
 import '../models/category.dart' as cat_model;
 import '../models/expense.dart';
+
 import 'database_service.dart';
 
-// Re-export so other files can use CategoryAnalysis directly
 export '../models/category.dart' show Category;
 
 class AppProvider extends ChangeNotifier {
@@ -14,13 +14,45 @@ class AppProvider extends ChangeNotifier {
   List<cat_model.Category> _categories = [];
   List<Expense> _expenses = [];
   bool _isLoading = false;
+  bool _isDarkMode = false;
 
   List<cat_model.Category> get categories => List.unmodifiable(_categories);
   List<Expense> get expenses => List.unmodifiable(_expenses);
   bool get isLoading => _isLoading;
+  bool get isDarkMode => _isDarkMode;
+
+  void toggleDarkMode() {
+    _isDarkMode = !_isDarkMode;
+
+    notifyListeners();
+  }
+
+  void setDarkMode(bool value) {
+    if (_isDarkMode == value) return;
+    _isDarkMode = value;
+
+    notifyListeners();
+  }
+
+  double get totalAmount =>
+      _expenses.fold<double>(0, (sum, e) => sum + e.amount);
+
+  int get expenseCount => _expenses.length;
+  int get categoryCount => _categories.length;
 
   AppProvider() {
-    loadAll();
+    _initAndLoad();
+  }
+
+  Future<void> _initAndLoad() async {
+    _isLoading = true;
+    notifyListeners();
+    await _db.database; // ensure DB created + seed run
+    await Future.delayed(const Duration(milliseconds: 80));
+    _categories = await _db.getAllCategories();
+    _expenses = await _db.getAllExpenses();
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> loadAll() async {
@@ -32,11 +64,11 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ── Categories ────────────────────────────────────────────────────────────
 
   Future<cat_model.Category> addCategory(String name,
       {String? description}) async {
-    final category =
-        cat_model.Category(name: name, description: description);
+    final category = cat_model.Category(name: name, description: description);
     final id = await _db.insertCategory(category);
     final saved = category.copyWith(id: id);
     _categories
@@ -71,6 +103,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  // ── Expenses ──────────────────────────────────────────────────────────────
 
   Future<Expense> addExpense({
     String? description,
@@ -92,7 +125,9 @@ class AppProvider extends ChangeNotifier {
     );
     final id = await _db.insertExpense(expense);
     final saved = expense.copyWith(id: id);
-    _expenses.insert(0, saved);
+    _expenses
+      ..add(saved)
+      ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
     notifyListeners();
     return saved;
   }
@@ -102,6 +137,7 @@ class AppProvider extends ChangeNotifier {
     final idx = _expenses.indexWhere((e) => e.id == expense.id);
     if (idx != -1) {
       _expenses[idx] = expense;
+      _expenses.sort((a, b) => b.dateTime.compareTo(a.dateTime));
       notifyListeners();
     }
   }
@@ -131,6 +167,5 @@ class AppProvider extends ChangeNotifier {
 class CategoryAnalysis {
   final cat_model.Category category;
   final double total;
-  const CategoryAnalysis(
-      {required this.category, required this.total});
+  const CategoryAnalysis({required this.category, required this.total});
 }

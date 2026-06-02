@@ -1,6 +1,7 @@
 // lib/screens/splash_screen.dart
 
 import 'package:flutter/material.dart';
+import '../utils/app_theme.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,21 +20,17 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-
     _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _scaleAnim = Tween<double>(begin: 0.80, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
-
     _controller.forward();
 
-    //HomeScreen μετά απο 2.5 δευτερόλεπτα
-    Future.delayed(const Duration(milliseconds: 2500), () {
+    Future.delayed(const Duration(milliseconds: 2400), () {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
@@ -56,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F0F0),
+      backgroundColor: AppTheme.background(context),
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -66,61 +63,54 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 110,
-                  height: 110,
+                  width: 124,
+                  height: 124,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
+                    gradient: AppTheme.primaryGradient,
+                    borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
+                        color: AppTheme.primary.withValues(alpha: 0.40),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
                       ),
                     ],
                   ),
                   child: const Center(
                     child: Icon(
-                      Icons.account_balance_wallet_rounded,
-                      size: 58,
-                      color: Color(0xFF1E3A5F),
+                      Icons.payments_rounded,
+                      size: 68,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-
-                // App title
-                const Text(
+                const SizedBox(height: 36),
+                Text(
                   'Expense App',
                   style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A2E),
-                    letterSpacing: 0.5,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary(context),
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 10),
-
-                // Subtitle
-                const Text(
-                  'Διαχείριση Εξόδων',
+                Text(
+                  'Διαχείριση εξόδων',
                   style: TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 0.2,
+                    fontSize: 16,
+                    color: AppTheme.textSecondary(context),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 72),
-
-                // Loading indicator
+                const SizedBox(height: 80),
                 SizedBox(
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
+                    strokeWidth: 3,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      const Color(0xFF1E3A5F).withValues(alpha: 0.5),
+                      AppTheme.primary.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
